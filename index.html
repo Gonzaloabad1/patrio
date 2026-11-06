@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-slate-950 text-slate-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Campus Virtual LMS | Policía Nacional España</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Three.js & OrbitControls -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts: Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            policia: {
+              dark: '#081225',
+              navy: '#0b192c',
+              blue: '#1e3e62',
+              cyan: '#0284c7',
+              gold: '#d4af37',
+              goldhover: '#b89628',
+              lightgold: '#fef3c7',
+              red: '#c0392b'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #081225; }
+    ::-webkit-scrollbar-thumb { background: #1e3e62; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #d4af37; }
+    @keyframes pulse-fast { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+    .animate-pulse-fast { animation: pulse-fast 0.6s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+    .badge-gold-glow { box-shadow: 0 0 15px rgba(212, 175, 55, 0.35); }
+  </style>
+</head>
+<body class="h-full font-sans bg-slate-950 text-slate-100 flex flex-col overflow-x-hidden">
+
+  <!-- TOP HEADER / INSTITUTIONAL BAR -->
+  <header class="bg-policia-dark border-b border-policia-blue/50 px-4 lg:px-8 py-3 flex items-center justify-between sticky top-0 z-50 shadow-xl">
+    <div class="flex items-center space-x-4">
+      <button id="mobileMenuBtn" class="lg:hidden text-slate-300 hover:text-policia-gold focus:outline-none">
+        <i class="fa-solid fa-bars text-xl"></i>
+      </button>
+      <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('dashboard')">
+       <div class="w-10 h-10 rounded-full bg-policia-navy border-2 border-policia-gold flex items-center justify-center text-policia-gold font-bold shadow-lg p-1.5 overflow-hidden">
+        <img src="0.jpg" alt="Logo" class="w-full h-full object-contain">
+       </div>
+        <div>
+          <div class="flex items-center space-x-2">
+            <span class="font-black tracking-wider text-lg text-white">PATRIO-POLICÍA NACIONAL</span>
+            <span class="bg-policia-gold/20 text-policia-gold text-[10px] px-2 py-0.5 rounded font-extrabold uppercase border border-policia-gold/40">ESPAÑA</span>
+          </div>
+          <p class="text-[11px] text-slate-400 font-medium">División de Formación y Perfeccionamiento · Campus Virtual LMS</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Search Bar -->
+    <div class="hidden md:flex items-center bg-slate-900/90 border border-slate-700/60 rounded-xl px-3.5 py-1.5 w-72 lg:w-96 text-xs focus-within:border-policia-gold transition-colors">
+      <i class="fa-solid fa-magnifying-glass text-slate-400 mr-2"></i>
+      <input type="text" placeholder="Buscar protocolos UIP, SIRDEE, TCCC..." class="bg-transparent text-slate-200 placeholder-slate-500 focus:outline-none w-full">
+      <span class="text-[10px] text-slate-500 border border-slate-700 rounded px-1.5 py-0.5 font-mono">Ctrl+K</span>
+    </div>
+
+    <!-- Active User & Notifications -->
+    <div class="flex items-center space-x-4">
+      <div class="relative">
+        <button id="notifBtn" class="relative p-2 text-slate-400 hover:text-policia-gold transition-colors rounded-lg hover:bg-policia-navy">
+          <i class="fa-regular fa-bell text-lg"></i>
+          <span class="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse"></span>
+        </button>
+        <div id="notifMenu" class="hidden absolute right-0 mt-2 w-80 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-50 p-4 space-y-3">
+          <div class="flex justify-between items-center pb-2 border-b border-slate-800">
+            <h4 class="text-xs font-bold uppercase text-policia-gold tracking-wider">Avisos Operativos DFP</h4>
+            <span class="text-[10px] bg-policia-gold/20 text-policia-gold px-2 py-0.5 rounded-full font-mono">Inicio de Curso</span>
+          </div>
+          <div class="space-y-2 text-xs">
+            <div class="p-2.5 bg-slate-850 rounded-lg border-l-2 border-policia-gold flex items-start space-x-2.5">
+              <i class="fa-solid fa-truck-fast text-policia-gold mt-0.5"></i>
+              <div>
+                <p class="font-bold text-slate-200">Módulos Iniciales Disponibles</p>
+                <p class="text-slate-400 text-[11px]">Inicie su formación desde el Módulo 1.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-3 pl-3 border-l border-slate-800">
+        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80" alt="Avatar Agente" class="w-9 h-9 rounded-full object-cover border-2 border-policia-gold shadow-md">
+        <div class="hidden sm:block text-left">
+          <div class="text-xs font-bold text-slate-100 flex items-center space-x-1">
+            <span>Inspector R. García</span>
+            <i class="fa-solid fa-circle-check text-policia-gold text-[10px]" title="Verificado DFP"></i>
+          </div>
+          <p class="text-[10px] text-slate-400 font-mono">UIP - 1ª Compañía · Madrid</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN APP LAYOUT -->
+  <div class="flex flex-1 overflow-hidden relative">
+
+    <!-- SIDEBAR NAVIGATION -->
+    <aside id="sidebar" class="w-64 bg-policia-dark border-r border-slate-800 flex-shrink-0 flex flex-col justify-between absolute lg:relative z-40 h-full transition-transform duration-300 transform -translate-x-full lg:translate-x-0">
+      <div class="p-4 space-y-6">
+        <!-- Operational Badge -->
+        <div class="bg-slate-900 border border-policia-blue/60 rounded-xl p-3.5 flex items-center space-x-3 shadow-md">
+          <div class="w-9 h-9 rounded-lg bg-policia-blue flex items-center justify-center text-policia-gold font-black border border-policia-gold/30">
+            UIP
+          </div>
+          <div>
+            <span class="text-xs font-bold text-slate-200 block">Unidad Intervención</span>
+            <span class="text-[10px] text-emerald-400 font-mono tracking-wide">● SERVICIO ACTIVO</span>
+          </div>
+        </div>
+
+        <!-- Menu Navigation -->
+        <div>
+          <h3 class="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider mb-2.5 px-3">Formación Especializada</h3>
+          <nav class="space-y-1">
+            <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-item active w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all text-white bg-policia-navy">
+              <i class="fa-solid fa-chart-pie w-5 text-policia-gold"></i>
+              <span>Dashboard General</span>
+            </button>
+            <button onclick="switchTab('simulador3d')" id="nav-simulador3d" class="nav-item w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all text-slate-400 hover:text-white hover:bg-policia-navy">
+              <i class="fa-solid fa-truck-monster w-5 text-policia-cyan"></i>
+              <span>Módulo 1: Furgones UIP (3D)</span>
+            </button>
+            <button onclick="switchTab('sanidad')" id="nav-sanidad" class="nav-item w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all text-slate-400 hover:text-white hover:bg-policia-navy">
+              <i class="fa-solid fa-kit-medical w-5 text-red-400"></i>
+              <span>Módulo 2: Sanidad Táctica UVI</span>
+            </button>
+            <button onclick="switchTab('normativa')" id="nav-normativa" class="nav-item w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all text-slate-400 hover:text-white hover:bg-policia-navy">
+              <i class="fa-solid fa-scale-balanced w-5 text-amber-400"></i>
+              <span>Módulo 3: Ley 4/2015 & Fuerza</span>
+            </button>
+            <button onclick="switchTab('evaluaciones')" id="nav-evaluaciones" class="nav-item w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all text-slate-400 hover:text-white hover:bg-policia-navy">
+              <i class="fa-solid fa-clipboard-question w-5 text-emerald-400"></i>
+              <span>Evaluaciones & Test</span>
+            </button>
+            <button onclick="switchTab('certificados')" id="nav-certificados" class="nav-item w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all text-slate-400 hover:text-white hover:bg-policia-navy">
+              <i class="fa-solid fa-award w-5 text-policia-gold"></i>
+              <span>Expediente & Diplomas</span>
+            </button>
+          </nav>
+        </div>
+      </div>
+
+      <!-- Footer Support Badge -->
+      <div class="p-4 border-t border-slate-800 bg-slate-950/60">
+        <div class="bg-slate-900 p-3 rounded-xl border border-policia-gold/20 text-center space-y-1">
+          <i class="fa-solid fa-headset text-policia-gold text-base"></i>
+          <p class="text-xs font-bold text-slate-200">División de Formación</p>
+          <p class="text-[10px] text-slate-400">Mesa de Ayuda Técnica DFP</p>
+          <button onclick="alert('Conectando con la Mesa de Ayuda de la DFP...')" class="w-full text-[11px] bg-policia-blue hover:bg-policia-cyan text-white py-1.5 rounded-lg font-semibold transition-colors mt-1">Soporte Técnico</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- CONTENT CONTAINER -->
+    <main class="flex-1 overflow-y-auto bg-slate-950 p-4 lg:p-6 space-y-6">
+
+      <!-- TAB 1: DASHBOARD GENERAL -->
+      <div id="tab-dashboard" class="tab-content space-y-6">
+        <!-- Hero Header -->
+        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-policia-navy via-slate-900 to-policia-dark border border-policia-gold/30 p-6 md:p-8 shadow-2xl">
+          <div class="absolute -right-10 -bottom-10 opacity-10 text-slate-100 pointer-events-none">
+            <i class="fa-solid fa-shield-halved text-9xl"></i>
+          </div>
+          <div class="relative z-10 max-w-3xl">
+            <div class="inline-flex items-center space-x-2 bg-policia-gold/20 border border-policia-gold/40 text-policia-gold px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-3">
+              <i class="fa-solid fa-star text-[10px]"></i>
+              <span>Plan Anual de Perfeccionamiento Táctico 2026</span>
+            </div>
+            <h1 class="text-2xl md:text-3xl font-extrabold text-white tracking-tight">Bienvenido al Campus Virtual, Inspector García</h1>
+            <p class="text-slate-300 text-xs md:text-sm mt-2 leading-relaxed">
+              Plataforma homologada de adiestramiento en **Logística UIP, Visores 3D de Furgones Operativos, Asistencia Sanitaria Táctica en Vehículo Adaptado UVI** y **Protocolos SIRDEE TETRAPOL**.
+            </p>
+            <div class="mt-5 flex flex-wrap gap-3">
+              <button onclick="switchTab('simulador3d')" class="bg-policia-gold hover:bg-policia-goldhover text-slate-950 font-black px-4 py-2.5 rounded-xl text-xs flex items-center space-x-2 shadow-lg transition-transform active:scale-95">
+                <i class="fa-solid fa-truck-monster"></i>
+                <span>Iniciar Módulo 1: Visor 3D UIP</span>
+              </button>
+              <button onclick="switchTab('evaluaciones')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 font-semibold px-4 py-2.5 rounded-xl text-xs flex items-center space-x-2 transition-colors">
+                <i class="fa-solid fa-clipboard-check"></i>
+                <span>Realizar Test Evaluativo</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Metrics Cards (Reset to 0) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Horas de Adiestramiento</span>
+              <div class="w-8 h-8 rounded-lg bg-blue-500/10 text-policia-cyan flex items-center justify-center">
+                <i class="fa-solid fa-clock"></i>
+              </div>
+            </div>
+            <div class="mt-3 flex items-baseline space-x-2">
+              <span class="text-2xl font-black text-white" id="stat-hours">0.0</span>
+              <span class="text-xs text-slate-400 font-semibold">Pendiente iniciar</span>
+            </div>
+            <div class="w-full bg-slate-800 h-1.5 rounded-full mt-3 overflow-hidden">
+              <div class="bg-policia-cyan h-full rounded-full" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Módulos Completados</span>
+              <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+                <i class="fa-solid fa-circle-check"></i>
+              </div>
+            </div>
+            <div class="mt-3 flex items-baseline space-x-2">
+              <span class="text-2xl font-black text-white" id="stat-modules">0 / 3</span>
+              <span class="text-xs text-slate-400 font-mono">0% General</span>
+            </div>
+            <div class="w-full bg-slate-800 h-1.5 rounded-full mt-3 overflow-hidden">
+              <div class="bg-emerald-500 h-full rounded-full" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Acreditación Operativa</span>
+              <div class="w-8 h-8 rounded-lg bg-policia-gold/10 text-policia-gold flex items-center justify-center">
+                <i class="fa-solid fa-shield"></i>
+              </div>
+            </div>
+            <div class="mt-3 flex items-baseline space-x-2">
+              <span class="text-xl font-black text-policia-gold">NIVEL II UIP</span>
+              <span class="text-[10px] bg-policia-gold/20 text-policia-gold px-1.5 py-0.5 rounded font-bold">En Curso</span>
+            </div>
+            <p class="text-[11px] text-slate-400 mt-2 font-mono">Convocatoria: 2026</p>
+          </div>
+
+          <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Calificación Media Test</span>
+              <div class="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center">
+                <i class="fa-solid fa-award"></i>
+              </div>
+            </div>
+            <div class="mt-3 flex items-baseline space-x-2">
+              <span class="text-2xl font-black text-white" id="stat-score">-</span>
+              <span class="text-xs text-slate-400">/ 10</span>
+            </div>
+            <div class="w-full bg-slate-800 h-1.5 rounded-full mt-3 overflow-hidden">
+              <div class="bg-amber-400 h-full rounded-full" style="width: 0%"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modules Grid Summary -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-3 hover:border-policia-gold transition-all">
+            <div class="w-12 h-12 rounded-xl bg-policia-navy border border-policia-gold/40 flex items-center justify-center text-policia-gold text-xl font-bold">
+              <i class="fa-solid fa-truck-monster"></i>
+            </div>
+            <h3 class="font-extrabold text-white text-base">Módulo 1: Logística y Visor 3D UIP</h3>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              Estudio del furgón de intervención rápida en 3D interactivo. Distribución interior, estiba, consolas SIRDEE y simulacro en Puerta del Sol.
+            </p>
+            <button onclick="switchTab('simulador3d')" class="w-full bg-policia-blue hover:bg-policia-cyan text-white text-xs font-bold py-2 rounded-xl transition-colors">
+              Iniciar Módulo 1 (Desde el Principio)
+            </button>
+          </div>
+
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-3 hover:border-policia-gold transition-all">
+            <div class="w-12 h-12 rounded-xl bg-slate-850 border border-red-500/40 flex items-center justify-center text-red-400 text-xl font-bold">
+              <i class="fa-solid fa-kit-medical"></i>
+            </div>
+            <h3 class="font-extrabold text-white text-base">Módulo 2: Sanidad Táctica UVI</h3>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              Adaptación de habitáculo posterior a soporte vital avanzado. Protocolos TCCC, botellas de oxígeno y control de grandes hemorragias.
+            </p>
+            <button onclick="switchTab('sanidad')" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold py-2 rounded-xl transition-colors border border-slate-700">
+              Ver Guía Médica
+            </button>
+          </div>
+
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-3 hover:border-policia-gold transition-all">
+            <div class="w-12 h-12 rounded-xl bg-slate-850 border border-amber-500/40 flex items-center justify-center text-amber-400 text-xl font-bold">
+              <i class="fa-solid fa-scale-balanced"></i>
+            </div>
+            <h3 class="font-extrabold text-white text-base">Módulo 3: Marco Legal & Fuerza</h3>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              Ley Orgánica 4/2015 de Protección de la Seguridad Ciudadana. Principios de congruencia, oportunidad y uso progresivo de medios.
+            </p>
+            <button onclick="switchTab('normativa')" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold py-2 rounded-xl transition-colors border border-slate-700">
+              Estudiar Normativa
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2: MÓDULO 1 - SIMULADOR 3D FURGONES UIP Y SIRDEE -->
+      <div id="tab-simulador3d" class="tab-content hidden space-y-4">
+        <div class="flex flex-col md:flex-row md:items-center justify-between pb-2 border-b border-slate-800 gap-2">
+          <div>
+            <span class="bg-policia-gold/20 text-policia-gold border border-policia-gold/40 text-[10px] font-bold px-2.5 py-0.5 rounded uppercase">MÓDULO 1 · INICIO DE LECCIÓN</span>
+            <h1 class="text-xl md:text-2xl font-black text-white mt-1">Despliegue Operativo y Logística de Furgones UIP (Visor 3D)</h1>
+          </div>
+          <div class="flex items-center space-x-2 text-xs font-mono">
+            <span class="bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-lg text-emerald-400">
+              <i class="fa-solid fa-radio text-cyan-400 mr-1.5"></i> CANAL: UIP-MADRID-04
+            </span>
+          </div>
+        </div>
+
+        <!-- 3D SIMULATOR & CONTROL PANEL CONTAINER -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+          <!-- 3D Canvas Area (8 Cols) -->
+          <div class="lg:col-span-8 flex flex-col gap-3">
+            <div class="relative bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-2xl h-[480px] lg:h-[540px]">
+              <canvas id="three-canvas" class="w-full h-full block cursor-grab active:cursor-grabbing"></canvas>
+
+              <!-- Dynamic Alert Overlay -->
+              <div id="emergency-banner" class="hidden absolute top-4 left-1/2 -translate-x-1/2 bg-red-600/90 backdrop-blur border border-red-400 text-white px-5 py-2 rounded-full text-xs font-extrabold shadow-xl flex items-center space-x-2 animate-pulse">
+                <i class="fa-solid fa-lightbulb text-amber-300"></i>
+                <span>PROTOCOLO DE CRISIS ACTIVO · PUERTA DEL SOL</span>
+              </div>
+
+              <!-- Camera View Selector -->
+              <div class="absolute top-4 left-4 bg-slate-950/85 backdrop-blur border border-slate-800 rounded-xl p-1.5 flex flex-wrap gap-1 z-10 text-xs">
+                <button onclick="setCameraView('sol')" id="btn-cam-sol" class="px-3 py-1.5 rounded-lg font-semibold bg-policia-blue text-white shadow flex items-center space-x-1.5">
+                  <i class="fa-solid fa-map-pin"></i> <span>Vista Sol 3D</span>
+                </button>
+                <button onclick="setCameraView('van')" id="btn-cam-van" class="px-3 py-1.5 rounded-lg font-semibold text-slate-300 hover:bg-slate-800 flex items-center space-x-1.5">
+                  <i class="fa-solid fa-truck-monster"></i> <span>Furgón UIP</span>
+                </button>
+                <button onclick="setCameraView('cabin')" id="btn-cam-cabin" class="px-3 py-1.5 rounded-lg font-semibold text-slate-300 hover:bg-slate-800 flex items-center space-x-1.5">
+                  <i class="fa-solid fa-eye"></i> <span>Cabina Interior</span>
+                </button>
+                <button onclick="setCameraView('sirdee')" id="btn-cam-sirdee" class="px-3 py-1.5 rounded-lg font-semibold text-slate-300 hover:bg-slate-800 flex items-center space-x-1.5">
+                  <i class="fa-solid fa-radio"></i> <span>Consola SIRDEE</span>
+                </button>
+              </div>
+
+              <!-- Viewport Overlay Controls -->
+              <div class="absolute bottom-4 right-4 bg-slate-950/85 backdrop-blur border border-slate-800 rounded-xl p-2 flex flex-col gap-2 z-10 text-xs">
+                <button onclick="toggleTransparency()" id="btn-transparency" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-700 flex items-center space-x-2">
+                  <i class="fa-solid fa-box text-policia-cyan"></i> <span>Rayos X / Transparencia</span>
+                </button>
+                <button onclick="toggleHeadlights()" id="btn-lights" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-700 flex items-center space-x-2">
+                  <i class="fa-solid fa-lightbulb text-amber-400"></i> <span>Faros & Destellos</span>
+                </button>
+              </div>
+
+              <div class="absolute bottom-4 left-4 pointer-events-none bg-slate-950/70 backdrop-blur px-3 py-1 rounded-lg text-[10px] text-slate-400 border border-slate-800 font-mono">
+                Arrastrar: Rotar 3D | Rueda: Zoom | Clic derecho: Pan
+              </div>
+            </div>
+
+            <!-- TACTICAL ACTIONS BAR -->
+            <div class="bg-slate-900 rounded-2xl border border-slate-800 p-4 grid grid-cols-1 md:grid-cols-3 gap-3 shadow-lg">
+              <button id="btn-emergency-toggle" onclick="toggleEmergencyMode()" class="md:col-span-1 bg-gradient-to-r from-red-700 to-red-600 hover:from-red-600 hover:to-red-500 text-white font-bold p-3.5 rounded-xl border border-red-500 shadow-lg flex items-center justify-center space-x-3 transition-all active:scale-95">
+                <i class="fa-solid fa-triangle-exclamation text-xl"></i>
+                <div class="text-left">
+                  <div class="text-[10px] font-mono uppercase text-red-200">Protocolo de Crisis</div>
+                  <div id="emergency-btn-text" class="text-sm font-extrabold">ACTIVAR DESALOJO SOL</div>
+                </div>
+              </button>
+
+              <button id="btn-siren-audio" onclick="toggleSirenAudio()" class="bg-slate-800 hover:bg-slate-750 text-slate-200 p-3 rounded-xl border border-slate-700 flex items-center justify-between px-4">
+                <div class="flex items-center space-x-3">
+                  <div class="p-2 rounded-lg bg-slate-700 text-policia-cyan">
+                    <i class="fa-solid fa-volume-high text-sm"></i>
+                  </div>
+                  <div class="text-left">
+                    <div class="text-[10px] text-slate-400 font-mono">Sirena Sónica 100W</div>
+                    <div id="siren-audio-status" class="text-xs font-bold text-slate-200">Silencioso</div>
+                  </div>
+                </div>
+                <span id="audio-indicator" class="w-3 h-3 rounded-full bg-slate-600"></span>
+              </button>
+
+              <button onclick="toggleStrobeSpeed()" class="bg-slate-800 hover:bg-slate-750 text-slate-200 p-3 rounded-xl border border-slate-700 flex items-center justify-between px-4">
+                <div class="flex items-center space-x-3">
+                  <div class="p-2 rounded-lg bg-slate-700 text-amber-400">
+                    <i class="fa-solid fa-bolt text-sm"></i>
+                  </div>
+                  <div class="text-left">
+                    <div class="text-[10px] text-slate-400 font-mono">Puente LED Azul (Nuevo)</div>
+                    <div id="strobe-speed-text" class="text-xs font-bold text-slate-200">Modo Estándar</div>
+                  </div>
+                </div>
+                <span class="text-[10px] font-mono bg-slate-900 px-2 py-1 rounded text-amber-400 border border-slate-700">140 BPM</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- SIRDEE Terminal & Documentation Sidebar (4 Cols) -->
+          <div class="lg:col-span-4 flex flex-col gap-4">
+            <!-- SIRDEE TERMINAL CARD -->
+            <div class="bg-slate-900 rounded-2xl border border-slate-800 p-4 shadow-xl flex flex-col space-y-3">
+              <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                <h2 class="text-xs font-extrabold tracking-wider text-slate-200 flex items-center space-x-2">
+                  <i class="fa-solid fa-radio text-policia-cyan"></i>
+                  <span>CONSOLA SIRDEE TETRAPOL</span>
+                </h2>
+                <span class="text-[9px] font-mono bg-slate-800 text-slate-400 px-2 py-0.5 rounded border border-slate-700">UIP-SP-821</span>
+              </div>
+
+              <!-- SIRDEE Status Codes Grid -->
+              <div class="grid grid-cols-2 gap-2 text-xs">
+                <button onclick="setSirdeeCode(1)" id="sirdee-btn-1" class="p-2.5 rounded-xl border bg-slate-800 border-slate-700 text-slate-300 text-left hover:bg-slate-750 transition-all">
+                  <div class="text-[9px] font-mono text-slate-400">CÓDIGO 1</div>
+                  <div class="text-xs font-bold">En Trayecto Sol</div>
+                </button>
+                <button onclick="setSirdeeCode(2)" id="sirdee-btn-2" class="p-2.5 rounded-xl border bg-policia-navy border-policia-gold text-policia-gold text-left transition-all">
+                  <div class="text-[9px] font-mono text-policia-gold">CÓDIGO 2</div>
+                  <div class="text-xs font-bold">Km. Zero Posición</div>
+                </button>
+                <button onclick="setSirdeeCode(3)" id="sirdee-btn-3" class="p-2.5 rounded-xl border bg-slate-800 border-slate-700 text-slate-300 text-left hover:bg-slate-750 transition-all">
+                  <div class="text-[9px] font-mono text-red-400">CÓDIGO RED</div>
+                  <div class="text-xs font-bold">Desalojo Activo</div>
+                </button>
+                <button onclick="triggerSOS()" id="sirdee-btn-sos" class="p-2.5 rounded-xl border bg-red-950/60 border-red-700 text-red-400 hover:bg-red-900 text-left transition-all flex items-center justify-between">
+                  <div>
+                    <div class="text-[9px] font-mono font-bold">ALERTA SOS</div>
+                    <div class="text-xs font-bold">PÁNICO RADIO</div>
+                  </div>
+                  <i class="fa-solid fa-triangle-exclamation text-red-400 animate-bounce"></i>
+                </button>
+              </div>
+
+              <!-- Real-time SIRDEE Radio Logs -->
+              <div class="bg-slate-950 rounded-xl p-3 border border-slate-800 font-mono text-xs h-36 flex flex-col justify-between">
+                <div class="text-[9px] text-slate-500 border-b border-slate-850 pb-1 flex justify-between">
+                  <span>LOG TRANSMISIONES TETRAPOL</span>
+                  <span class="text-emerald-400 flex items-center space-x-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> <span>EN VIVO</span></span>
+                </div>
+                <div id="radio-log" class="overflow-y-auto space-y-1.5 my-1 pr-1 flex-1 text-[10px]">
+                  <div class="text-slate-400"><span class="text-slate-600">[Sistema]</span> Módulo 1 iniciado desde el principio. Furgón listo.</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- TABBED LOGISTICAL MANUAL -->
+            <div class="bg-slate-900 rounded-2xl border border-slate-800 p-4 shadow-xl flex-1 flex flex-col">
+              <div class="flex border-b border-slate-800 gap-2 mb-3 text-xs">
+                <button onclick="switchSubTab('subtab-tactica')" id="btn-subtab-tactica" class="pb-2 px-1 font-bold border-b-2 border-policia-gold text-policia-gold">
+                  Procedimiento Sol
+                </button>
+                <button onclick="switchSubTab('subtab-furgon')" id="btn-subtab-furgon" class="pb-2 px-1 font-bold border-b-2 border-transparent text-slate-400 hover:text-white">
+                  Ficha Técnica UIP
+                </button>
+              </div>
+
+              <div id="subtab-tactica" class="subtab-content space-y-2 text-xs text-slate-300">
+                <p class="text-slate-400 leading-relaxed text-[11px]">
+                  <strong>Protocolo UIP Desalojo Urbano:</strong> Cerramiento concéntrico gradual mediante furgones ligeros y despliegue de escudos de protección.
+                </p>
+                <ul class="space-y-1.5 text-[11px]">
+                  <li class="flex items-start space-x-2">
+                    <span class="bg-blue-900/60 text-blue-300 font-mono text-[9px] px-1.5 py-0.5 rounded font-bold">Fase 1</span>
+                    <span>Aseguramiento de accesos principales (Montera, Preciados, Carmen).</span>
+                  </li>
+                  <li class="flex items-start space-x-2">
+                    <span class="bg-amber-900/60 text-amber-300 font-mono text-[9px] px-1.5 py-0.5 rounded font-bold">Fase 2</span>
+                    <span>Emisión de apercibimientos por megafonía SIRDEE/100W.</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div id="subtab-furgon" class="subtab-content hidden space-y-2 text-xs text-slate-300">
+                <div class="grid grid-cols-2 gap-2 text-[10px] font-mono">
+                  <div class="bg-slate-950 p-2 rounded-lg border border-slate-800">
+                    <span class="text-slate-500 block">MODELO NUEVO</span>
+                    <strong class="text-slate-200">UIP Mercedes Sprinter Restyling</strong>
+                  </div>
+                  <div class="bg-slate-950 p-2 rounded-lg border border-slate-800">
+                    <span class="text-slate-500 block">PROTECCIÓN</span>
+                    <strong class="text-slate-200">VR4 Policial / Rejas Avanzadas</strong>
+                  </div>
+                </div>
+                <button onclick="downloadSimulatedPDF('Ficha_Tecnica_Furgon_UIP_Nuevo.pdf')" class="w-full mt-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs py-2 rounded-xl transition-colors border border-slate-700 flex items-center justify-center space-x-2">
+                  <i class="fa-solid fa-file-pdf text-red-400"></i>
+                  <span>Descargar Ficha Técnica PDF</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: MÓDULO 2 - SANIDAD TÁCTICA & UVI MÓVIL -->
+      <div id="tab-sanidad" class="tab-content hidden space-y-6">
+        <div class="pb-4 border-b border-slate-800">
+          <span class="bg-red-500/20 text-red-400 border border-red-500/40 text-[10px] font-bold px-2.5 py-0.5 rounded uppercase">MÓDULO 2 · SANIDAD OPERATIVA</span>
+          <h1 class="text-2xl font-black text-white mt-1">Soporte Vital Táctico & Adaptación UVI Móvil</h1>
+          <p class="text-xs text-slate-400 mt-1">Configuración asistencial del habitáculo posterior y protocolos de rescate TCCC de la Policía Nacional</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
+            <h3 class="text-base font-extrabold text-white flex items-center space-x-2">
+              <i class="fa-solid fa-box-tissue text-red-400"></i>
+              <span>Distribución Asistencial UVI Móvil</span>
+            </h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              La conversión de un furgón UIP a soporte vital avanzado incluye la mampara divisoria aislante, soporte electromecánico de camilla con fijación anti-impacto (20G) y bancada lateral con acceso rápido a botellas de oxígeno de 10L.
+            </p>
+            <ul class="space-y-2 text-xs text-slate-400">
+              <li class="flex items-center space-x-2"><i class="fa-solid fa-check text-emerald-400"></i> <span>Mampara balística con ventana panorámica estéril.</span></li>
+              <li class="flex items-center space-x-2"><i class="fa-solid fa-check text-emerald-400"></i> <span>Instalación de resucitadores manuales y aspirador de secreciones.</span></li>
+              <li class="flex items-center space-x-2"><i class="fa-solid fa-check text-emerald-400"></i> <span>Tomas de corriente 12V / 220V para desfibrilador operables en marcha.</span></li>
+            </ul>
+            <button onclick="downloadSimulatedPDF('Manual_Sanidad_Tactica_UVI.pdf')" class="bg-policia-blue hover:bg-policia-cyan text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-colors flex items-center space-x-2">
+              <i class="fa-solid fa-file-pdf"></i>
+              <span>Manual Sanitario UVI Móvil (PDF)</span>
+            </button>
+          </div>
+
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
+            <h3 class="text-base font-extrabold text-white flex items-center space-x-2">
+              <i class="fa-solid fa-kit-medical text-policia-gold"></i>
+              <span>Protocolo TCCC (Care Under Fire)</span>
+            </h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Procedimientos de intervención sanitaria bajo amenaza en intervenciones de orden público y control de masas.
+            </p>
+            <div class="space-y-2 text-xs">
+              <div class="p-3 bg-slate-950 rounded-xl border border-slate-800">
+                <span class="font-bold text-red-400 block">1. C - Hemorragia Exanguinante</span>
+                <span class="text-slate-400 text-[11px]">Colocación de torniquete táctico (CAT 7) en extremidad afectada sobre la vestimenta en < 15 segundos.</span>
+              </div>
+              <div class="p-3 bg-slate-950 rounded-xl border border-slate-800">
+                <span class="font-bold text-amber-400 block">2. A - Vía Aérea</span>
+                <span class="text-slate-400 text-[11px]">Permeabilización y colocación de cánula nasofaríngea en caso de estupor.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 4: MÓDULO 3 - NORMATIVA & LEY 4/2015 -->
+      <div id="tab-normativa" class="tab-content hidden space-y-6">
+        <div class="pb-4 border-b border-slate-800">
+          <span class="bg-amber-500/20 text-amber-400 border border-amber-500/40 text-[10px] font-bold px-2.5 py-0.5 rounded uppercase">MÓDULO 3 · MARCO JURÍDICO</span>
+          <h1 class="text-2xl font-black text-white mt-1">Uso Graduado de la Fuerza y Ley Orgánica 4/2015</h1>
+          <p class="text-xs text-slate-400 mt-1">Principios deontológicos de oportunidad, congruencia y proporcionalidad en el empleo de medios policiales</p>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
+          <h3 class="text-base font-extrabold text-white">Principios Esenciales de Actuación</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+            <div class="p-4 bg-slate-950 rounded-xl border border-slate-800">
+              <span class="font-extrabold text-policia-gold block mb-1">Congruencia</span>
+              <p class="text-slate-400 text-[11px]">Adecuación entre el motivo de la intervención policial y la medida adoptada.</p>
+            </div>
+            <div class="p-4 bg-slate-950 rounded-xl border border-slate-800">
+              <span class="font-extrabold text-policia-cyan block mb-1">Oportunidad</span>
+              <p class="text-slate-400 text-[11px]">Momento idóneo para efectuar el despliegue sin incrementar el riesgo general.</p>
+            </div>
+            <div class="p-4 bg-slate-950 rounded-xl border border-slate-800">
+              <span class="font-extrabold text-emerald-400 block mb-1">Proporcionalidad</span>
+              <p class="text-slate-400 text-[11px]">Uso gradual de los medios defensivos según la intensidad de la alteración del orden.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 5: EVALUACIONES & TEST INTERACTIVO -->
+      <div id="tab-evaluaciones" class="tab-content hidden space-y-6">
+        <div class="pb-4 border-b border-slate-800">
+          <h1 class="text-2xl font-black text-white">Evaluaciones Tácticas & Examen Oficial</h1>
+          <p class="text-xs text-slate-400 mt-1">Evaluación de conocimientos sobre el furgón UIP, consolas SIRDEE y protocolos de actuación</p>
+        </div>
+
+        <div class="bg-slate-900 border border-policia-gold/30 rounded-2xl p-6 shadow-2xl max-w-3xl mx-auto space-y-6">
+          <div class="flex items-center justify-between text-xs font-mono">
+            <span class="text-policia-gold font-bold">PREGUNTA <span id="quiz-current-num">1</span> DE <span id="quiz-total-num">4</span></span>
+            <span class="bg-slate-800 text-slate-300 px-3 py-1 rounded-full border border-slate-700">Test Inicial DFP</span>
+          </div>
+          <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+            <div id="quiz-progress-bar" class="bg-policia-gold h-full transition-all duration-300" style="width: 25%"></div>
+          </div>
+
+          <div id="quiz-question-card" class="space-y-4 py-2">
+            <h3 id="quiz-question-title" class="text-base md:text-lg font-extrabold text-white leading-relaxed">
+              <!-- Question loaded via JS -->
+            </h3>
+            <div id="quiz-options-container" class="space-y-3">
+              <!-- Options loaded via JS -->
+            </div>
+          </div>
+
+          <div id="quiz-feedback-box" class="hidden p-4 rounded-xl text-xs space-y-1"></div>
+
+          <div class="flex items-center justify-between pt-4 border-t border-slate-800">
+            <button onclick="resetQuiz()" class="text-xs font-bold text-slate-400 hover:text-white flex items-center space-x-1">
+              <i class="fa-solid fa-rotate-left"></i> <span>Reiniciar Test</span>
+            </button>
+            <button id="quiz-next-btn" onclick="nextQuestion()" class="bg-policia-gold hover:bg-policia-goldhover text-slate-950 font-extrabold text-xs px-5 py-2.5 rounded-xl transition-all shadow-md flex items-center space-x-2">
+              <span>Siguiente Pregunta</span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 6: EXPEDIENTE & CERTIFICADOS -->
+      <div id="tab-certificados" class="tab-content hidden space-y-6">
+        <div class="pb-4 border-b border-slate-800">
+          <h1 class="text-2xl font-black text-white">Expediente Académico y Certificados DFP</h1>
+          <p class="text-xs text-slate-400 mt-1">Acreditaciones oficiales obtenidas en la División de Formación y Perfeccionamiento</p>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 text-center space-y-3">
+          <div class="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center mx-auto text-slate-400 text-lg">
+            <i class="fa-solid fa-lock"></i>
+          </div>
+          <h3 class="text-base font-bold text-white">Ningún diploma emitido aún</h3>
+          <p class="text-xs text-slate-400">Complete los módulos formativos y apruebe el examen oficial para desbloquear su certificado DFP.</p>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- JAVASCRIPT LOGIC ENGINE -->
+  <script>
+    // GLOBAL STATE
+    const state = {
+      emergencyActive: false,
+      sirenAudioActive: false,
+      strobeFast: false,
+      headlightsOn: true,
+      transparentBody: false,
+      currentSirdeeCode: 2,
+      strobeTimer: 0
+    };
+
+    // AUDIO CONTEXT
+    let audioCtx = null;
+    let sirenOscillator = null;
+    let sirenGainNode = null;
+    let sirenInterval = null;
+
+    // THREE.JS VARIABLES
+    let scene, camera, renderer, controls;
+    let vanGroup, vanBodyMesh;
+    let strobeLights = [];
+    let headlights = [];
+
+    // WINDOW INITIALIZATION
+    window.onload = function() {
+      initThreeScene();
+      initAudio();
+      animate();
+      renderQuestion();
+    };
+
+    // TAB SWITCHING LOGIC
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active', 'bg-policia-navy', 'text-white');
+        item.classList.add('text-slate-400');
+      });
+
+      const selectedTab = document.getElementById('tab-' + tabId);
+      if (selectedTab) selectedTab.classList.remove('hidden');
+
+      const selectedNav = document.getElementById('nav-' + tabId);
+      if (selectedNav) {
+        selectedNav.classList.add('active', 'bg-policia-navy', 'text-white');
+        selectedNav.classList.remove('text-slate-400');
+      }
+
+      if (tabId === 'simulador3d' && renderer) {
+        setTimeout(onWindowResize, 100);
+      }
+
+      const sidebar = document.getElementById('sidebar');
+      if (!sidebar.classList.contains('-translate-x-full')) {
+        sidebar.classList.add('-translate-x-full');
+      }
+    }
+
+    function switchSubTab(subTabId) {
+      document.querySelectorAll('.subtab-content').forEach(el => el.classList.add('hidden'));
+      document.getElementById(subTabId).classList.remove('hidden');
+
+      const btnTactica = document.getElementById('btn-subtab-tactica');
+      const btnFurgon = document.getElementById('btn-subtab-furgon');
+
+      if (subTabId === 'subtab-tactica') {
+        btnTactica.className = "pb-2 px-1 font-bold border-b-2 border-policia-gold text-policia-gold";
+        btnFurgon.className = "pb-2 px-1 font-bold border-b-2 border-transparent text-slate-400 hover:text-white";
+      } else {
+        btnFurgon.className = "pb-2 px-1 font-bold border-b-2 border-policia-gold text-policia-gold";
+        btnTactica.className = "pb-2 px-1 font-bold border-b-2 border-transparent text-slate-400 hover:text-white";
+      }
+    }
+
+    document.getElementById('mobileMenuBtn').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.toggle('-translate-x-full');
+    });
+
+    const notifBtn = document.getElementById('notifBtn');
+    const notifMenu = document.getElementById('notifMenu');
+    notifBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      notifMenu.classList.toggle('hidden');
+    });
+    document.addEventListener('click', () => notifMenu.classList.add('hidden'));
+
+    // THREE.JS SIMULATOR INITIALIZATION - MODELO UIP ACTUALIZADO CON PROTECCIONES Y REJAS
+    function initThreeScene() {
+      const container = document.getElementById('three-canvas').parentElement;
+      const width = container.clientWidth;
+      const height = container.clientHeight;
+
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x050a14);
+      scene.fog = new THREE.FogExp2(0x050a14, 0.03);
+
+      camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+      renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('three-canvas'), antialias: true });
+      renderer.setSize(width, height);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+      controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.05;
+      controls.maxPolarAngle = Math.PI / 2 + 0.01;
+
+      const ambientLight = new THREE.AmbientLight(0x1e293b, 0.9);
+      scene.add(ambientLight);
+
+      const moonLight = new THREE.DirectionalLight(0x38bdf8, 0.6);
+      moonLight.position.set(20, 40, 20);
+      scene.add(moonLight);
+
+      createSolPlaza();
+      createDetailedUIPVan();
+      setCameraView('sol');
+
+      window.addEventListener('resize', onWindowResize);
+    }
+
+    function createSolPlaza() {
+      const groundGeo = new THREE.PlaneGeometry(80, 80);
+      const groundMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.8 });
+      const ground = new THREE.Mesh(groundGeo, groundMat);
+      ground.rotation.x = -Math.PI / 2;
+      scene.add(ground);
+
+      const grid = new THREE.GridHelper(80, 40, 0x0284c7, 0x1e293b);
+      grid.position.y = 0.01;
+      scene.add(grid);
+    }
+
+    function createDetailedUIPVan() {
+      vanGroup = new THREE.Group();
+
+      // Material azul oscuro oficial UIP
+      const uipBlueMat = new THREE.MeshStandardMaterial({ color: 0x061122, roughness: 0.25, metalness: 0.6 });
+      vanBodyMesh = uipBlueMat;
+
+      // Cuerpo principal
+      const bodyGeo = new THREE.BoxGeometry(2.35, 2.15, 5.5);
+      const body = new THREE.Mesh(bodyGeo, uipBlueMat);
+      body.position.y = 1.45;
+      vanGroup.add(body);
+
+      // Franja operativa azul celeste
+      const stripeGeo = new THREE.BoxGeometry(2.39, 0.45, 5.4);
+      const stripeMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.3 });
+      const stripe = new THREE.Mesh(stripeGeo, stripeMat);
+      stripe.position.y = 1.35;
+      vanGroup.add(stripe);
+
+      // Franja identificativa dorada
+      const yellowLineGeo = new THREE.BoxGeometry(2.41, 0.08, 5.4);
+      const yellowLineMat = new THREE.MeshBasicMaterial({ color: 0xd4af37 });
+      const yellowLine = new THREE.Mesh(yellowLineGeo, yellowLineMat);
+      yellowLine.position.y = 1.15;
+      vanGroup.add(yellowLine);
+
+      // Emblemas laterales Policía Nacional
+      const emblemGeo = new THREE.PlaneGeometry(0.5, 0.5);
+      const emblemMat = new THREE.MeshBasicMaterial({ color: 0xd4af37, side: THREE.DoubleSide });
+      
+      const emblemLeft = new THREE.Mesh(emblemGeo, emblemMat);
+      emblemLeft.position.set(-1.18, 1.45, 0.2);
+      emblemLeft.rotation.y = -Math.PI / 2;
+      vanGroup.add(emblemLeft);
+
+      const emblemRight = new THREE.Mesh(emblemGeo, emblemMat);
+      emblemRight.position.set(1.18, 1.45, 0.2);
+      emblemRight.rotation.y = Math.PI / 2;
+      vanGroup.add(emblemRight);
+
+      // Lunas y Parabrisas
+      const glassMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, transparent: true, opacity: 0.85 });
+      const windshieldGeo = new THREE.PlaneGeometry(2.0, 0.9);
+      const windshield = new THREE.Mesh(windshieldGeo, glassMat);
+      windshield.position.set(0, 1.8, 2.78);
+      windshield.rotation.x = -0.3;
+      vanGroup.add(windshield);
+
+      // --- PROTECCIONES METÁLICAS Y REJAS ANTIDISTURBIOS (Basado en imagen 1_3.jpg) ---
+      const riotMeshMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.4, metalness: 0.8, wireframe: false });
+      
+      // Reja protectora inclinada sobre el capó
+      const hoodGrilleGeo = new THREE.BoxGeometry(2.2, 0.1, 1.8);
+      const hoodGrille = new THREE.Mesh(hoodGrilleGeo, riotMeshMat);
+      hoodGrille.position.set(0, 1.25, 2.0);
+      hoodGrille.rotation.x = 0.45;
+      vanGroup.add(hoodGrille);
+
+      // Bullbar de protección frontal de acero negro
+      const bullbarGeo = new THREE.BoxGeometry(2.25, 0.85, 0.35);
+      const bullbar = new THREE.Mesh(bullbarGeo, riotMeshMat);
+      bullbar.position.set(0, 0.65, 2.85);
+      vanGroup.add(bullbar);
+
+      // Matrícula simulada
+      const plateGeo = new THREE.PlaneGeometry(0.6, 0.2);
+      const plateMat = new THREE.MeshBasicMaterial({ color: 0xfff59d });
+      const plate = new THREE.Mesh(plateGeo, plateMat);
+      plate.position.set(0, 0.75, 3.03);
+      vanGroup.add(plate);
+
+      // Puente de luces superior y sirenas
+      const roofBarGeo = new THREE.BoxGeometry(1.6, 0.12, 0.6);
+      const roofBarMat = new THREE.MeshStandardMaterial({ color: 0x111827, metalness: 0.8 });
+      const roofBar = new THREE.Mesh(roofBarGeo, roofBarMat);
+      roofBar.position.set(0, 2.58, 1.2);
+      vanGroup.add(roofBar);
+
+      const strobeGeo = new THREE.BoxGeometry(0.5, 0.15, 0.35);
+      const strobeBlueMat = new THREE.MeshBasicMaterial({ color: 0x0066ff });
+      const strobeRedMat = new THREE.MeshBasicMaterial({ color: 0xff0033 });
+
+      const strobeLeft = new THREE.Mesh(strobeGeo, strobeBlueMat);
+      strobeLeft.position.set(-0.5, 2.68, 1.2);
+      vanGroup.add(strobeLeft);
+
+      const strobeRight = new THREE.Mesh(strobeGeo, strobeRedMat);
+      strobeRight.position.set(0.5, 2.68, 1.2);
+      vanGroup.add(strobeRight);
+
+      const blueLight = new THREE.PointLight(0x0066ff, 0, 25);
+      blueLight.position.set(-1.0, 2.8, 1.2);
+      vanGroup.add(blueLight);
+      strobeLights.push({ mesh: strobeLeft, light: blueLight });
+
+      const redLight = new THREE.PointLight(0xff0033, 0, 25);
+      redLight.position.set(1.0, 2.8, 1.2);
+      vanGroup.add(redLight);
+      strobeLights.push({ mesh: strobeRight, light: redLight });
+
+      // Faros principales y luces de largo alcance
+      const headlightGeo = new THREE.BoxGeometry(0.45, 0.25, 0.1);
+      const headlightMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+      const headlightL = new THREE.Mesh(headlightGeo, headlightMat);
+      headlightL.position.set(-0.9, 1.0, 2.82);
+      vanGroup.add(headlightL);
+
+      const headlightR = new THREE.Mesh(headlightGeo, headlightMat);
+      headlightR.position.set(0.9, 1.0, 2.82);
+      vanGroup.add(headlightR);
+
+      const spotL = new THREE.SpotLight(0xffffff, 3.0, 35, Math.PI / 6, 0.5);
+      spotL.position.set(-0.9, 1.0, 2.85);
+      spotL.target.position.set(-0.9, 0, 15);
+      vanGroup.add(spotL);
+      vanGroup.add(spotL.target);
+      headlights.push(spotL);
+
+      const spotR = new THREE.SpotLight(0xffffff, 3.0, 35, Math.PI / 6, 0.5);
+      spotR.position.set(0.9, 1.0, 2.85);
+      spotR.target.position.set(0.9, 0, 15);
+      vanGroup.add(spotR);
+      vanGroup.add(spotR.target);
+      headlights.push(spotR);
+
+      // Interior y mampara de separación táctica
+      const interiorPartitionGeo = new THREE.BoxGeometry(2.2, 2.0, 0.1);
+      const interiorPartitionMat = new THREE.MeshStandardMaterial({ color: 0x334155 });
+      const partition = new THREE.Mesh(interiorPartitionGeo, interiorPartitionMat);
+      partition.position.set(0, 1.45, 0.5);
+      vanGroup.add(partition);
+
+      const stretcherBenchGeo = new THREE.BoxGeometry(0.8, 0.9, 2.2);
+      const stretcherBenchMat = new THREE.MeshStandardMaterial({ color: 0x475569 });
+      const stretcherBench = new THREE.Mesh(stretcherBenchGeo, stretcherBenchMat);
+      stretcherBench.position.set(0, 1.0, -1.2);
+      vanGroup.add(stretcherBench);
+
+      scene.add(vanGroup);
+    }
+
+    function setCameraView(preset) {
+      if (preset === 'sol') {
+        camera.position.set(12, 10, 16);
+        controls.target.set(0, 1, 0);
+      } else if (preset === 'van') {
+        camera.position.set(4, 3, 5);
+        controls.target.set(0, 1.4, 0);
+      } else if (preset === 'cabin') {
+        camera.position.set(0, 1.6, 1.4);
+        controls.target.set(0, 1.4, 4);
+      } else if (preset === 'sirdee') {
+        camera.position.set(0.1, 1.5, 1.9);
+        controls.target.set(0, 1.3, 2.2);
+      }
+      controls.update();
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+      state.strobeTimer += state.strobeFast ? 0.35 : 0.18;
+      const strobeActive = state.emergencyActive || state.currentSirdeeCode === 3;
+
+      strobeLights.forEach((strobe, idx) => {
+        if (strobeActive) {
+          const flash = Math.sin(state.strobeTimer + (idx * Math.PI)) > 0;
+          strobe.light.intensity = flash ? 5.0 : 0;
+          strobe.mesh.material.opacity = flash ? 1.0 : 0.2;
+        } else {
+          strobe.light.intensity = 0;
+          strobe.mesh.material.opacity = 0.8;
+        }
+      });
+
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    function onWindowResize() {
+      const container = document.getElementById('three-canvas').parentElement;
+      if (!container) return;
+      camera.aspect = container.clientWidth / container.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(container.clientWidth, container.clientHeight);
+    }
+
+    function toggleEmergencyMode() {
+      state.emergencyActive = !state.emergencyActive;
+      const banner = document.getElementById('emergency-banner');
+      const btnText = document.getElementById('emergency-btn-text');
+
+      if (state.emergencyActive) {
+        banner.classList.remove('hidden');
+        btnText.innerText = "DESALOJO ACTIVO (DESACTIVAR)";
+        setSirdeeCode(3);
+        if (!state.sirenAudioActive) toggleSirenAudio();
+        logRadioMessage("ALERTA UIP: Protocolo de desalojo Sol activado con nuevo furgón.");
+      } else {
+        banner.classList.add('hidden');
+        btnText.innerText = "ACTIVAR DESALOJO SOL";
+        if (state.sirenAudioActive) toggleSirenAudio();
+        setSirdeeCode(2);
+        logRadioMessage("UIP-MADRID: Protocolo finalizado. Posición Cód 2.");
+      }
+    }
+
+    function toggleHeadlights() {
+      state.headlightsOn = !state.headlightsOn;
+      headlights.forEach(spot => spot.intensity = state.headlightsOn ? 3.0 : 0);
+    }
+
+    function toggleTransparency() {
+      state.transparentBody = !state.transparentBody;
+      vanBodyMesh.transparent = true;
+      vanBodyMesh.opacity = state.transparentBody ? 0.35 : 1.0;
+    }
+
+    function toggleStrobeSpeed() {
+      state.strobeFast = !state.strobeFast;
+      document.getElementById('strobe-speed-text').innerText = state.strobeFast ? "Modo Intervención Alta" : "Modo Estándar";
+    }
+
+    function initAudio() {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioContext();
+      } catch (e) {}
+    }
+
+    function toggleSirenAudio() {
+      if (!audioCtx) initAudio();
+      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+
+      state.sirenAudioActive = !state.sirenAudioActive;
+      const audioStatus = document.getElementById('siren-audio-status');
+      const indicator = document.getElementById('audio-indicator');
+
+      if (state.sirenAudioActive) {
+        startSirenSound();
+        audioStatus.innerText = "SIRENA ACTIVA";
+        audioStatus.className = "text-xs font-bold text-red-400 animate-pulse";
+        indicator.className = "w-3 h-3 rounded-full bg-red-500 animate-ping";
+      } else {
+        stopSirenSound();
+        audioStatus.innerText = "Silencioso";
+        audioStatus.className = "text-xs font-bold text-slate-200";
+        indicator.className = "w-3 h-3 rounded-full bg-slate-600";
+      }
+    }
+
+    function startSirenSound() {
+      if (!audioCtx) return;
+      sirenOscillator = audioCtx.createOscillator();
+      sirenGainNode = audioCtx.createGain();
+
+      sirenOscillator.type = 'sawtooth';
+      sirenOscillator.frequency.setValueAtTime(435, audioCtx.currentTime);
+      sirenGainNode.gain.setValueAtTime(0.12, audioCtx.currentTime);
+
+      sirenOscillator.connect(sirenGainNode);
+      sirenGainNode.connect(audioCtx.destination);
+      sirenOscillator.start();
+
+      let high = false;
+      sirenInterval = setInterval(() => {
+        if (sirenOscillator && audioCtx) {
+          sirenOscillator.frequency.exponentialRampToValueAtTime(
+            high ? 435 : 950,
+            audioCtx.currentTime + 0.8
+          );
+          high = !high;
+        }
+      }, 850);
+    }
+
+    function stopSirenSound() {
+      if (sirenInterval) clearInterval(sirenInterval);
+      if (sirenOscillator) {
+        try { sirenOscillator.stop(); sirenOscillator.disconnect(); } catch(e){}
+        sirenOscillator = null;
+      }
+    }
+
+    function setSirdeeCode(code) {
+      state.currentSirdeeCode = code;
+      [1, 2, 3].forEach(n => {
+        const btn = document.getElementById(`sirdee-btn-${n}`);
+        if (btn) {
+          if (n === code) {
+            btn.className = "p-2.5 rounded-xl border bg-policia-navy border-policia-gold text-policia-gold text-left font-bold shadow-md";
+          } else {
+            btn.className = "p-2.5 rounded-xl border bg-slate-800 border-slate-700 text-slate-300 text-left hover:bg-slate-750";
+          }
+        }
+      });
+
+      if (code === 1) logRadioMessage("SIRDEE CÓDIGO 1: En trayecto a Sol.");
+      if (code === 2) logRadioMessage("SIRDEE CÓDIGO 2: Posición alcanzada Km. Cero.");
+      if (code === 3) logRadioMessage("SIRDEE CÓDIGO RED: Desalojo activo.");
+    }
+
+    function triggerSOS() {
+      setSirdeeCode(3);
+      if (!state.emergencyActive) toggleEmergencyMode();
+      logRadioMessage("!!! ALERTA SOS / PÁNICO !!! Transmisión enviada a CETOP.");
+    }
+
+    function logRadioMessage(msg) {
+      const logContainer = document.getElementById('radio-log');
+      if (!logContainer) return;
+      const timeStr = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      const entry = document.createElement('div');
+      entry.className = "text-slate-300 border-l-2 border-policia-cyan pl-1.5 py-0.5";
+      entry.innerHTML = `<span class="text-slate-500">[${timeStr}]</span> ${msg}`;
+      logContainer.appendChild(entry);
+      logContainer.scrollTop = logContainer.scrollHeight;
+    }
+
+    // QUIZ SYSTEM DATA & ENGINE
+    const quizData = [
+      {
+        question: "¿Qué resistencia mínima deben soportar los anclajes de equipos en un furgón UIP adaptado?",
+        options: ["5G lateral", "10G frontal", "20G de desaceleración frontal y lateral", "No requieren fijación específica"],
+        correct: 2,
+        explanation: "La normativa exige 20G para prevenir proyectiles dentro del habitáculo en maniobras evasivas."
+      },
+      {
+        question: "En el protocolo TCCC de Sanidad Táctica, ¿cuál es la primera medida ante una gran hemorragia en extremidades?",
+        options: ["Vendaje compresivo de gasa", "Torniquete táctico (CAT 7) de aplicación rápida", "Oxigenoterapia a 15L/min", "Toma de constantes"],
+        correct: 1,
+        explanation: "El control inmediato de la hemorragia exanguinante (Massive Bleeding) es la máxima prioridad."
+      },
+      {
+        question: "¿Qué principio rige la oportunidad del despliegue defensivo según la Ley Orgánica 4/2015?",
+        options: ["Discreción absoluta", "Momento oportuno idóneo para evitar males mayores", "Empleo de la fuerza sin apercibimiento", "Uso exclusivo de megafonía"],
+        correct: 1,
+        explanation: "El principio de oportunidad determina el momento idóneo evitando incrementar riesgos innecesarios."
+      },
+      {
+        question: "¿Cuál es el código SIRDEE TETRAPOL que indica unidad en posición fija de espera?",
+        options: ["Código 1", "Código 2", "Código RED", "Código SOS"],
+        correct: 1,
+        explanation: "Código 2 indica que el indicativo ha llegado a su posición operativa fijada."
+      }
+    ];
+
+    let currentQuestionIdx = 0;
+    let score = 0;
+    let selectedOption = null;
+
+    function renderQuestion() {
+      const q = quizData[currentQuestionIdx];
+      document.getElementById('quiz-current-num').innerText = currentQuestionIdx + 1;
+      document.getElementById('quiz-total-num').innerText = quizData.length;
+      document.getElementById('quiz-progress-bar').style.width = ((currentQuestionIdx + 1) / quizData.length * 100) + '%';
+      document.getElementById('quiz-question-title').innerText = q.question;
+
+      const container = document.getElementById('quiz-options-container');
+      container.innerHTML = '';
+      document.getElementById('quiz-feedback-box').classList.add('hidden');
+      selectedOption = null;
+
+      q.options.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = "w-full text-left p-3.5 rounded-xl border border-slate-800 bg-slate-950 text-xs text-slate-200 font-medium transition-all flex items-center justify-between";
+        btn.onclick = () => selectOption(idx, btn);
+        btn.innerHTML = `<span>${opt}</span><i class="fa-regular fa-circle text-slate-600"></i>`;
+        container.appendChild(btn);
+      });
+    }
+
+    function selectOption(idx, btnElement) {
+      const buttons = document.getElementById('quiz-options-container').children;
+      for (let b of buttons) {
+        b.className = "w-full text-left p-3.5 rounded-xl border border-slate-800 bg-slate-950 text-xs text-slate-200 font-medium transition-all flex items-center justify-between";
+        b.querySelector('i').className = "fa-regular fa-circle text-slate-600";
+      }
+      selectedOption = idx;
+      btnElement.className = "w-full text-left p-3.5 rounded-xl border-2 border-policia-gold bg-policia-navy text-xs text-white font-bold transition-all flex items-center justify-between shadow-md";
+      btnElement.querySelector('i').className = "fa-solid fa-circle-dot text-policia-gold";
+    }
+
+    function nextQuestion() {
+      if (selectedOption === null) {
+        alert("Por favor, selecciona una opción.");
+        return;
+      }
+      const q = quizData[currentQuestionIdx];
+      const feedback = document.getElementById('quiz-feedback-box');
+      feedback.classList.remove('hidden');
+
+      if (selectedOption === q.correct) {
+        score++;
+        feedback.className = "p-4 rounded-xl text-xs bg-emerald-950/80 border border-emerald-500/50 text-emerald-200 space-y-1";
+        feedback.innerHTML = `<p class="font-bold"><i class="fa-solid fa-circle-check mr-1.5"></i> ¡Respuesta Correcta!</p><p class="text-[11px] text-emerald-300/80">${q.explanation}</p>`;
+      } else {
+        feedback.className = "p-4 rounded-xl text-xs bg-red-950/80 border border-red-500/50 text-red-200 space-y-1";
+        feedback.innerHTML = `<p class="font-bold"><i class="fa-solid fa-circle-xmark mr-1.5"></i> Respuesta Incorrecta</p><p class="text-[11px] text-red-300/80">${q.explanation}</p>`;
+      }
+
+      setTimeout(() => {
+        currentQuestionIdx++;
+        if (currentQuestionIdx < quizData.length) {
+          renderQuestion();
+        } else {
+          finishQuiz();
+        }
+      }, 2000);
+    }
+
+    function finishQuiz() {
+      const finalScore = Math.round((score / quizData.length) * 10);
+      const card = document.getElementById('quiz-question-card');
+      document.getElementById('quiz-options-container').innerHTML = '';
+      document.getElementById('quiz-feedback-box').classList.add('hidden');
+      document.getElementById('quiz-next-btn').classList.add('hidden');
+
+      card.innerHTML = `
+        <div class="text-center py-6 space-y-3">
+          <div class="w-16 h-16 bg-policia-gold/20 text-policia-gold border-2 border-policia-gold rounded-full flex items-center justify-center mx-auto text-2xl font-black badge-gold-glow">
+            <i class="fa-solid fa-award"></i>
+          </div>
+          <h3 class="text-lg font-black text-white">Evaluación Completada</h3>
+          <p class="text-xs text-slate-300">Calificación obtenida: <span class="text-policia-gold font-bold text-base">${finalScore} / 10</span></p>
+          <button onclick="resetQuiz()" class="bg-policia-gold text-slate-950 font-bold text-xs px-5 py-2.5 rounded-xl shadow-lg hover:bg-policia-goldhover transition-all inline-flex items-center space-x-2">
+            <i class="fa-solid fa-rotate-right"></i> <span>Repetir Test</span>
+          </button>
+        </div>
+      `;
+      document.getElementById('stat-score').innerText = finalScore;
+    }
+
+    function resetQuiz() {
+      currentQuestionIdx = 0;
+      score = 0;
+      selectedOption = null;
+      document.getElementById('quiz-next-btn').classList.remove('hidden');
+      renderQuestion();
+    }
+
+    function downloadSimulatedPDF(filename) {
+      alert("📥 Descargando documento oficial de la Policía Nacional: " + filename);
+    }
+  </script>
+</body>
+</html>
